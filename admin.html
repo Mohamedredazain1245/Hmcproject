@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة التحكم — HMC</title>
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="theme-color" content="#12201A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Noto+Kufi+Arabic:wght@500;600;700;800&family=Source+Sans+3:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green-950:#12201A;
+    --green-900:#182B22;
+    --green-800:#22392D;
+    --cream:#F2EDE1;
+    --cream-2:#E8E0CE;
+    --paper:#FBF9F4;
+    --gold:#C79A5C;
+    --gold-light:#DDBD8B;
+    --gold-dark:#9C7539;
+    --ink:#1A1912;
+    --stone:#6D6656;
+    --line:#D9D0BB;
+    --line-dark:#3A4A3F;
+    --white:#FDFCF8;
+    --danger:#B23B3B;
+    --danger-bg:#F7E9E7;
+    --radius-s:4px;
+    --radius-m:10px;
+    --maxw:1180px;
+    --ease:cubic-bezier(.22,.68,.32,1);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Tajawal','Source Sans 3','Noto Kufi Arabic',system-ui,sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Noto Kufi Arabic', system-ui, sans-serif;
+    font-weight:700;
+    line-height:1.3;
+    margin:0;
+  }
+  p{margin:0;}
+  button{font:inherit;cursor:pointer;}
+  img{max-width:100%;display:block;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+
+  /* ---------- Header ---------- */
+  header{
+    background:var(--green-950);border-bottom:1px solid var(--line-dark);
+    position:sticky;top:0;z-index:50;
+  }
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 24px;max-width:var(--maxw);margin:0 auto;gap:16px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;color:var(--cream);}
+  .brand b{font-family:'Archivo',sans-serif;font-weight:800;font-size:19px;letter-spacing:.01em;}
+  .brand span{font-size:13px;color:var(--gold-light);}
+  .site-link{
+    display:inline-flex;align-items:center;gap:8px;color:var(--cream-2);
+    font-size:13.5px;font-weight:600;border:1px solid var(--line-dark);
+    padding:9px 16px;border-radius:20px;transition:border-color .2s,color .2s;
+    text-decoration:none;
+  }
+  .site-link:hover{border-color:var(--gold-light);color:var(--gold-light);}
+
+  .status-bar{background:var(--green-900);border-bottom:1px solid var(--line-dark);}
+  .status-inner{
+    max-width:var(--maxw);margin:0 auto;padding:9px 24px;
+    display:flex;align-items:center;gap:9px;font-size:13px;color:var(--cream-2);
+  }
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--stone);flex-shrink:0;}
+  .dot.ok{background:#6FA37B;}
+  .dot.bad{background:#C4665F;}
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    display:flex;gap:6px;margin:28px 0 22px;border-bottom:1px solid var(--line);
+  }
+  .tab{
+    padding:12px 20px;font-size:15px;font-weight:700;color:var(--stone);
+    border-bottom:2px solid transparent;margin-bottom:-1px;
+    background:none;border-top:none;border-right:none;border-left:none;
+    transition:color .2s,border-color .2s;
+  }
+  .tab.active{color:var(--green-950);border-bottom-color:var(--gold-dark);}
+  .tab .count{
+    display:inline-block;margin-right:6px;background:var(--cream-2);color:var(--stone);
+    font-size:12px;font-weight:700;padding:1px 8px;border-radius:10px;
+  }
+  .tab.active .count{background:var(--gold);color:var(--white);}
+
+  .section{display:none;}
+  .section.active{display:block;}
+
+  /* ---------- Add card ---------- */
+  .add-card{
+    background:var(--white);border:1px solid var(--line);border-radius:var(--radius-m);
+    padding:22px;margin-bottom:28px;
+  }
+  .add-card h3{font-size:17px;margin-bottom:16px;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1/-1;}
+  .field label{font-size:13px;font-weight:700;color:var(--stone);}
+  .field input[type=text], .field textarea{
+    font-family:inherit;font-size:14.5px;padding:11px 13px;border:1px solid var(--line);
+    border-radius:var(--radius-s);background:var(--paper);color:var(--ink);resize:vertical;
+  }
+  .field input:focus, .field textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  .field small{font-size:12px;color:var(--stone);}
+
+  .img-drop{
+    border:1.5px dashed var(--line);border-radius:var(--radius-s);
+    padding:14px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;
+    background:var(--paper);
+  }
+  .img-drop:hover{border-color:var(--gold);}
+  .img-drop input{display:none;}
+  .img-drop .hint{font-size:13px;color:var(--stone);}
+  .img-preview{
+    margin-top:10px;position:relative;border-radius:var(--radius-s);overflow:hidden;
+    aspect-ratio:16/10;background:var(--cream-2);display:none;
+  }
+  .img-preview.show{display:block;}
+  .img-preview img{width:100%;height:100%;object-fit:cover;}
+  .img-preview button{
+    position:absolute;top:6px;left:6px;background:rgba(18,32,26,.8);color:var(--white);
+    border:none;border-radius:50%;width:26px;height:26px;font-size:14px;line-height:1;
+  }
+
+  .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:var(--radius-s);
+    font-weight:700;font-size:14.5px;border:1.5px solid transparent;transition:background .2s,border-color .2s,color .2s;
+  }
+  .btn-primary{background:var(--green-950);color:var(--cream);}
+  .btn-primary:hover{background:var(--green-800);}
+  .btn-primary:disabled{opacity:.55;cursor:not-allowed;}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--stone);}
+
+  /* ---------- Items grid ---------- */
+  .items-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+  .items-head h3{font-size:15px;color:var(--stone);font-weight:700;}
+  .items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+  .item-card{
+    background:var(--white);border:1px solid var(--line);border-radius:var(--radius-m);overflow:hidden;
+  }
+  .item-photo{aspect-ratio:16/10;background:var(--cream-2);position:relative;}
+  .item-photo img{width:100%;height:100%;object-fit:cover;}
+  .item-photo.empty::after{
+    content:"لا صورة";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    color:var(--stone);font-size:13px;
+  }
+  .item-body{padding:14px 16px 16px;}
+  .item-body h4{font-size:15.5px;margin-bottom:2px;}
+  .item-en-title{font-size:12px;color:var(--stone);font-style:italic;margin-bottom:6px;}
+  .item-body p{font-size:13px;color:var(--stone);line-height:1.6;margin-bottom:10px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .item-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+  .item-tags span{
+    font-size:11.5px;background:var(--cream);color:var(--stone);padding:3px 9px;border-radius:12px;
+  }
+  .item-actions{display:flex;gap:8px;}
+  .item-actions button{
+    flex:1;padding:8px 10px;font-size:13px;font-weight:700;border-radius:var(--radius-s);border:1px solid var(--line);
+    background:var(--paper);color:var(--ink);transition:border-color .2s,color .2s,background .2s;
+  }
+  .item-actions button:hover{border-color:var(--gold-dark);color:var(--gold-dark);}
+  .item-actions button.del:hover{border-color:var(--danger);color:var(--danger);background:var(--danger-bg);}
+
+  .empty-state{
+    text-align:center;padding:50px 20px;color:var(--stone);border:1.5px dashed var(--line);
+    border-radius:var(--radius-m);
+  }
+  .empty-state b{display:block;color:var(--ink);font-size:15px;margin-bottom:4px;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+    background:var(--green-950);color:var(--cream);padding:13px 22px;border-radius:var(--radius-s);
+    font-size:14px;font-weight:600;z-index:200;transition:transform .3s var(--ease);
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.err{background:var(--danger);}
+
+  /* ---------- Login gate ---------- */
+  #loginGate{
+    position:fixed;inset:0;background:var(--green-950);z-index:500;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  #loginGate.hidden{display:none;}
+  .login-card{
+    background:var(--white);border-radius:var(--radius-m);padding:34px 28px;width:100%;max-width:380px;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);
+  }
+  .login-card .brand{margin-bottom:22px;justify-content:center;}
+  .login-card h2{font-size:18px;margin-bottom:6px;text-align:center;}
+  .login-card p.sub{font-size:13px;color:var(--stone);text-align:center;margin-bottom:22px;}
+  .login-card .field{margin-bottom:14px;}
+  .login-card label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--ink);}
+  .login-card input{
+    width:100%;font-family:inherit;font-size:14.5px;padding:11px 13px;border:1px solid var(--line);
+    border-radius:var(--radius-s);background:var(--paper);
+  }
+  .login-card input:focus{outline:none;border-color:var(--gold-dark);}
+  .login-card .btn-primary{width:100%;justify-content:center;margin-top:6px;}
+  .login-error{
+    background:var(--danger-bg);color:var(--danger);font-size:13px;padding:10px 12px;
+    border-radius:var(--radius-s);margin-bottom:14px;display:none;
+  }
+  .login-error.show{display:block;}
+  #appContent.hidden{display:none;}
+  .logout-btn{
+    background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:var(--radius-s);
+    padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;
+  }
+  .logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+  footer.pad{height:60px;}
+
+  @media (max-width:640px){
+    .form-grid{grid-template-columns:1fr;}
+    .nav{flex-direction:column;align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<div id="loginGate">
+  <div class="login-card">
+    <div class="brand"><b>HMC</b><span>لوحة التحكم</span></div>
+    <h2>تسجيل الدخول</h2>
+    <p class="sub">من فضلك سجّل دخولك للوصول إلى لوحة التحكم</p>
+    <div class="login-error" id="loginError"></div>
+    <form id="loginForm">
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="loginEmail" required dir="ltr" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <label>الرقم السري</label>
+        <input type="password" id="loginPassword" required dir="ltr" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary" id="loginBtn">دخول</button>
+    </form>
+  </div>
+</div>
+
+<div id="appContent" class="hidden">
+
+<header>
+  <div class="nav">
+    <div class="brand"><b>HMC</b><span>لوحة التحكم</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a class="site-link" href="index.html" target="_blank" rel="noopener">
+        عرض الموقع ↗
+      </a>
+      <button class="logout-btn" id="logoutBtn" type="button">تسجيل الخروج</button>
+    </div>
+  </div>
+</header>
+<div class="status-bar">
+  <div class="status-inner">
+    <span class="dot" id="statusDot"></span>
+    <span id="statusText">جاري الاتصال بفايربيز...</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="tabs">
+    <button class="tab active" data-tab="projects">المشاريع <span class="count" id="countProjects">0</span></button>
+    <button class="tab" data-tab="fleet">المعدات <span class="count" id="countFleet">0</span></button>
+  </div>
+
+  <!-- Projects -->
+  <section class="section active" id="section-projects">
+    <div class="add-card">
+      <h3 id="formTitle-projects">إضافة مشروع جديد</h3>
+      <form id="form-projects">
+        <input type="hidden" name="editId">
+        <div class="form-grid">
+          <div class="field">
+            <label>عنوان المشروع (عربي)</label>
+            <input type="text" name="title_ar" required placeholder="مثال: طريق سريع - المنطقة الشرقية">
+          </div>
+          <div class="field">
+            <label>Project title (English)</label>
+            <input type="text" name="title_en" dir="ltr" placeholder="e.g. Eastern Region Highway">
+          </div>
+          <div class="field">
+            <label>وصف مختصر (عربي)</label>
+            <textarea name="desc_ar" rows="2" required placeholder="وصف قصير للمشروع"></textarea>
+          </div>
+          <div class="field">
+            <label>Short description (English)</label>
+            <textarea name="desc_en" rows="2" dir="ltr" placeholder="Short project description"></textarea>
+          </div>
+          <div class="field">
+            <label>الكلمات الدلالية عربي (افصل بينها بفاصلة)</label>
+            <input type="text" name="tags_ar" placeholder="مثال: بنية تحتية, طرق, 2026">
+          </div>
+          <div class="field">
+            <label>Tags in English (comma separated)</label>
+            <input type="text" name="tags_en" dir="ltr" placeholder="e.g. infrastructure, roads, 2026">
+          </div>
+          <div class="field full">
+            <label>صورة المشروع</label>
+            <div class="img-drop" data-for="projects">
+              <input type="file" accept="image/*" name="imgFile">
+              <span class="hint">اضغط لاختيار صورة</span>
+            </div>
+            <div class="img-preview"><img><button type="button" class="clear-img">×</button></div>
+            <small>سيتم ضغط الصورة تلقائيًا قبل الحفظ.</small>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost cancel-edit" style="display:none;">إلغاء التعديل</button>
+          <button type="submit" class="btn btn-primary">حفظ المشروع</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="items-head"><h3>المشاريع الحالية</h3></div>
+    <div class="items-grid" id="grid-projects"></div>
+    <div class="empty-state" id="empty-projects" style="display:none;">
+      <b>لا يوجد مشاريع بعد</b>أضف أول مشروع من الأعلى.
+    </div>
+  </section>
+
+  <!-- Fleet -->
+  <section class="section" id="section-fleet">
+    <div class="add-card">
+      <h3 id="formTitle-fleet">إضافة معدة جديدة</h3>
+      <form id="form-fleet">
+        <input type="hidden" name="editId">
+        <div class="form-grid">
+          <div class="field">
+            <label>اسم المعدة (عربي)</label>
+            <input type="text" name="title_ar" required placeholder="مثال: حفارة مجنزرة">
+          </div>
+          <div class="field">
+            <label>Equipment name (English)</label>
+            <input type="text" name="title_en" dir="ltr" placeholder="e.g. Tracked Excavator">
+          </div>
+          <div class="field">
+            <label>وصف مختصر (عربي)</label>
+            <textarea name="desc_ar" rows="2" required placeholder="وصف قصير للمعدة"></textarea>
+          </div>
+          <div class="field">
+            <label>Short description (English)</label>
+            <textarea name="desc_en" rows="2" dir="ltr" placeholder="Short equipment description"></textarea>
+          </div>
+          <div class="field">
+            <label>الكلمات الدلالية عربي (افصل بينها بفاصلة)</label>
+            <input type="text" name="tags_ar" placeholder="مثال: أعمال ترابية, بنية تحتية">
+          </div>
+          <div class="field">
+            <label>Tags in English (comma separated)</label>
+            <input type="text" name="tags_en" dir="ltr" placeholder="e.g. earthworks, infrastructure">
+          </div>
+          <div class="field full">
+            <label>صورة المعدة</label>
+            <div class="img-drop" data-for="fleet">
+              <input type="file" accept="image/*" name="imgFile">
+              <span class="hint">اضغط لاختيار صورة</span>
+            </div>
+            <div class="img-preview"><img><button type="button" class="clear-img">×</button></div>
+            <small>سيتم ضغط الصورة تلقائيًا قبل الحفظ.</small>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-ghost cancel-edit" style="display:none;">إلغاء التعديل</button>
+          <button type="submit" class="btn btn-primary">حفظ المعدة</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="items-head"><h3>المعدات الحالية</h3></div>
+    <div class="items-grid" id="grid-fleet"></div>
+    <div class="empty-state" id="empty-fleet" style="display:none;">
+      <b>لا يوجد معدات بعد</b>أضف أول معدة من الأعلى.
+    </div>
+  </section>
+
+  <footer class="pad"></footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div><!-- /#appContent -->
+
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+/* ============================================================
+   FIREBASE SETUP — paste the SAME config used in index.html.
+   Get it from: Firebase Console → Project settings → General
+   → "Your apps" → SDK setup and configuration → Config
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyCu5SOHLGQ0Whu-1f8QEAEHSILLioHFaFk",
+  authDomain: "hmc-project-e5ea3.firebaseapp.com",
+  projectId: "hmc-project-e5ea3",
+  storageBucket: "hmc-project-e5ea3.firebasestorage.app",
+  messagingSenderId: "252763523470",
+  appId: "1:252763523470:web:990887c7d417258fe9bcdf"
+};
+
+let db = null;
+let auth = null;
+let firebaseReady = false;
+try{
+  if(firebaseConfig.apiKey !== "YOUR_API_KEY"){
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    auth = firebase.auth();
+    firebaseReady = true;
+  }
+}catch(err){
+  console.error('Firebase init failed', err);
+}
+
+const statusDot = document.getElementById('statusDot');
+const statusText = document.getElementById('statusText');
+if(firebaseReady){
+  statusDot.classList.add('ok');
+  statusText.textContent = 'متصل بفايربيز — التغييرات تُحفظ وتظهر مباشرة على الموقع';
+}else{
+  statusDot.classList.add('bad');
+  statusText.textContent = 'لم يتم إعداد فايربيز بعد — افتح admin.html وأدخل بيانات مشروعك في FIREBASE SETUP بالأعلى';
+}
+
+/* ---------- Login gate ---------- */
+const loginGate = document.getElementById('loginGate');
+const appContent = document.getElementById('appContent');
+const loginForm = document.getElementById('loginForm');
+const loginError = document.getElementById('loginError');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+
+function showLoginError(msg){
+  loginError.textContent = msg;
+  loginError.classList.add('show');
+}
+
+if(firebaseReady && auth){
+  auth.onAuthStateChanged(user=>{
+    if(user){
+      loginGate.classList.add('hidden');
+      appContent.classList.remove('hidden');
+    }else{
+      appContent.classList.add('hidden');
+      loginGate.classList.remove('hidden');
+    }
+  });
+
+  loginForm.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    loginError.classList.remove('show');
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'جاري الدخول...';
+    auth.signInWithEmailAndPassword(email, password)
+      .catch(err=>{
+        const map = {
+          'auth/invalid-email': 'البريد الإلكتروني غير صحيح.',
+          'auth/user-not-found': 'لا يوجد حساب بهذا البريد.',
+          'auth/wrong-password': 'الرقم السري غير صحيح.',
+          'auth/invalid-credential': 'البريد الإلكتروني أو الرقم السري غير صحيح.',
+          'auth/too-many-requests': 'محاولات كثيرة جدًا، حاول بعد قليل.'
+        };
+        showLoginError(map[err.code] || 'حدث خطأ، حاول مرة أخرى.');
+      })
+      .finally(()=>{
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'دخول';
+      });
+  });
+
+  logoutBtn.addEventListener('click', ()=>{
+    auth.signOut();
+  });
+}else{
+  // No Firebase configured: skip the login gate entirely so the note above still shows.
+  loginGate.classList.add('hidden');
+  appContent.classList.remove('hidden');
+}
+
+const COLLECTIONS = { projects: 'hmc_projects', fleet: 'hmc_fleet' };
+let data = { projects: [], fleet: [] };
+
+function toast(msg, isErr){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.toggle('err', !!isErr);
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=> t.classList.remove('show'), 2600);
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('section-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+/* ---------- image compression ---------- */
+function compressImage(file, maxW = 1000, quality = 0.72){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = e=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------- wire each form ---------- */
+['projects','fleet'].forEach(kind=>{
+  const form = document.getElementById('form-' + kind);
+  const drop = form.querySelector('.img-drop');
+  const fileInput = form.querySelector('input[name=imgFile]');
+  const preview = form.querySelector('.img-preview');
+  const previewImg = preview.querySelector('img');
+  const clearBtn = form.querySelector('.clear-img');
+  const cancelBtn = form.querySelector('.cancel-edit');
+  let pendingImg = null;
+
+  drop.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', async ()=>{
+    const file = fileInput.files[0];
+    if(!file) return;
+    try{
+      pendingImg = await compressImage(file);
+      previewImg.src = pendingImg;
+      preview.classList.add('show');
+    }catch(err){
+      toast('تعذر معالجة الصورة', true);
+    }
+  });
+  clearBtn.addEventListener('click', ()=>{
+    pendingImg = null;
+    fileInput.value = '';
+    preview.classList.remove('show');
+  });
+
+  cancelBtn.addEventListener('click', ()=> resetForm());
+
+  function resetForm(){
+    form.reset();
+    form.editId.value = '';
+    pendingImg = null;
+    preview.classList.remove('show');
+    cancelBtn.style.display = 'none';
+    document.getElementById('formTitle-' + kind).textContent =
+      kind === 'projects' ? 'إضافة مشروع جديد' : 'إضافة معدة جديدة';
+  }
+
+  form.addEventListener('submit', async e=>{
+    e.preventDefault();
+    if(!firebaseReady){
+      toast('فايربيز غير مفعّل بعد — راجع إعدادات الاتصال بالأعلى', true);
+      return;
+    }
+    const submitBtn = form.querySelector('button[type=submit]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'جارٍ الحفظ...';
+
+    const title_ar = form.title_ar.value.trim();
+    const title_en = form.title_en.value.trim();
+    const desc_ar = form.desc_ar.value.trim();
+    const desc_en = form.desc_en.value.trim();
+    const tags_ar = form.tags_ar.value.split(',').map(t=>t.trim()).filter(Boolean);
+    const tags_en = form.tags_en.value.split(',').map(t=>t.trim()).filter(Boolean);
+    const editId = form.editId.value;
+
+    const payload = { title_ar, title_en, desc_ar, desc_en, tags_ar, tags_en };
+    if(pendingImg) payload.img = pendingImg;
+
+    try{
+      if(editId){
+        await db.collection(COLLECTIONS[kind]).doc(editId).update(payload);
+        toast('تم تحديث العنصر بنجاح');
+      }else{
+        if(!pendingImg){
+          toast('من فضلك أضف صورة', true);
+          submitBtn.disabled = false;
+          submitBtn.textContent = kind === 'projects' ? 'حفظ المشروع' : 'حفظ المعدة';
+          return;
+        }
+        payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        await db.collection(COLLECTIONS[kind]).add(payload);
+        toast('تمت الإضافة بنجاح');
+      }
+      resetForm();
+      await loadAll();
+    }catch(err){
+      console.error(err);
+      toast('حدث خطأ أثناء الحفظ', true);
+    }finally{
+      submitBtn.disabled = false;
+      submitBtn.textContent = kind === 'projects' ? 'حفظ المشروع' : 'حفظ المعدة';
+    }
+  });
+
+  form._resetForm = resetForm;
+  form._startEdit = (item)=>{
+    form.editId.value = item.id;
+    form.title_ar.value = item.title_ar || item.title || '';
+    form.title_en.value = item.title_en || '';
+    form.desc_ar.value = item.desc_ar || item.desc || '';
+    form.desc_en.value = item.desc_en || '';
+    form.tags_ar.value = (item.tags_ar || item.tags || []).join(', ');
+    form.tags_en.value = (item.tags_en || []).join(', ');
+    pendingImg = null;
+    if(item.img){
+      previewImg.src = item.img;
+      preview.classList.add('show');
+    }else{
+      preview.classList.remove('show');
+    }
+    cancelBtn.style.display = 'inline-flex';
+    document.getElementById('formTitle-' + kind).textContent =
+      kind === 'projects' ? 'تعديل المشروع' : 'تعديل المعدة';
+    form.scrollIntoView({behavior:'smooth', block:'start'});
+  };
+});
+
+/* ---------- render + load ---------- */
+function renderGrid(kind){
+  const grid = document.getElementById('grid-' + kind);
+  const empty = document.getElementById('empty-' + kind);
+  const list = data[kind];
+  document.getElementById('count' + (kind==='projects'?'Projects':'Fleet')).textContent = list.length;
+
+  if(!list.length){
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = list.map(item => `
+    <article class="item-card" data-id="${item.id}">
+      <div class="item-photo ${item.img ? '' : 'empty'}">
+        ${item.img ? `<img src="${item.img}" alt="">` : ''}
+      </div>
+      <div class="item-body">
+        <h4>${escapeHtml(item.title_ar || item.title || '')}</h4>
+        ${item.title_en ? `<p class="item-en-title" dir="ltr">${escapeHtml(item.title_en)}</p>` : ''}
+        <p>${escapeHtml(item.desc_ar || item.desc || '')}</p>
+        <div class="item-tags">${[...(item.tags_ar || item.tags || []), ...(item.tags_en || [])].map(t=>`<span>${escapeHtml(t)}</span>`).join('')}</div>
+        <div class="item-actions">
+          <button type="button" class="edit">تعديل</button>
+          <button type="button" class="del">حذف</button>
+        </div>
+      </div>
+    </article>
+  `).join('');
+
+  grid.querySelectorAll('.item-card').forEach(card=>{
+    const id = card.dataset.id;
+    const item = list.find(i=>i.id === id);
+    card.querySelector('.edit').addEventListener('click', ()=>{
+      document.getElementById('form-' + kind)._startEdit(item);
+    });
+    card.querySelector('.del').addEventListener('click', ()=> confirmDelete(kind, item));
+  });
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+async function confirmDelete(kind, item){
+  const label = kind === 'projects' ? 'المشروع' : 'المعدة';
+  if(!confirm(`هل أنت متأكد من حذف ${label} "${item.title_ar || item.title || ''}"؟ لا يمكن التراجع عن هذا الإجراء.`)) return;
+  try{
+    await db.collection(COLLECTIONS[kind]).doc(item.id).delete();
+    toast('تم الحذف');
+    await loadAll();
+  }catch(err){
+    console.error(err);
+    toast('تعذر الحذف', true);
+  }
+}
+
+async function loadAll(){
+  if(!firebaseReady) return;
+  for(const kind of ['projects','fleet']){
+    try{
+      const snap = await db.collection(COLLECTIONS[kind]).orderBy('createdAt','asc').get();
+      data[kind] = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }catch(err){
+      console.error('Failed to load ' + kind, err);
+      data[kind] = [];
+    }
+    renderGrid(kind);
+  }
+}
+
+loadAll();
+</script>
+</body>
+</html>
